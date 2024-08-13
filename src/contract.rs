@@ -1,22 +1,21 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{
-    to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
-};
-use cw20_base::ContractError;
-use cw20_base::enumerable::{query_all_allowances, query_all_accounts};
-use cw20_base::msg::{QueryMsg,ExecuteMsg};
-
-use crate::msg::MigrateMsg;
+use cosmwasm_std::{to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 use cw2::set_contract_version;
 use cw20_base::allowances::{
-    execute_decrease_allowance, execute_increase_allowance, execute_send_from,
-    execute_transfer_from, query_allowance, execute_burn_from,
+    execute_burn_from, execute_decrease_allowance, execute_increase_allowance, execute_send_from,
+    execute_transfer_from, query_allowance,
 };
 use cw20_base::contract::{
-    execute_mint, execute_send, execute_transfer, execute_update_marketing,
-    execute_upload_logo, query_balance, query_token_info, query_minter, query_download_logo, query_marketing_info, execute_burn,
+    execute_burn, execute_mint, execute_send, execute_transfer, execute_update_marketing,
+    execute_update_minter, execute_upload_logo, query_balance, query_download_logo,
+    query_marketing_info, query_minter, query_token_info,
 };
+use cw20_base::enumerable::{query_all_accounts, query_owner_allowances, query_spender_allowances};
+use cw20_base::msg::{ExecuteMsg, QueryMsg};
+use cw20_base::ContractError;
+
+use crate::msg::MigrateMsg;
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:cw20-token";
@@ -39,7 +38,7 @@ pub fn execute(
     env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
-) -> Result<Response, cw20_base::ContractError> {
+) -> Result<Response, ContractError> {
     match msg {
         ExecuteMsg::Transfer { recipient, amount } => {
             execute_transfer(deps, env, info, recipient, amount)
@@ -79,6 +78,9 @@ pub fn execute(
             marketing,
         } => execute_update_marketing(deps, env, info, project, description, marketing),
         ExecuteMsg::UploadLogo(logo) => execute_upload_logo(deps, env, info, logo),
+        ExecuteMsg::UpdateMinter { new_minter } => {
+            execute_update_minter(deps, env, info, new_minter)
+        }
     }
 }
 
@@ -95,10 +97,20 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             owner,
             start_after,
             limit,
-        } => to_json_binary(&query_all_allowances(deps, owner, start_after, limit)?),
+        } => to_json_binary(&query_owner_allowances(deps, owner, start_after, limit)?),
         QueryMsg::AllAccounts { start_after, limit } => {
             to_json_binary(&query_all_accounts(deps, start_after, limit)?)
         }
+        QueryMsg::AllSpenderAllowances {
+            spender,
+            start_after,
+            limit,
+        } => to_json_binary(&query_spender_allowances(
+            deps,
+            spender,
+            start_after,
+            limit,
+        )?),
         QueryMsg::MarketingInfo {} => to_json_binary(&query_marketing_info(deps)?),
         QueryMsg::DownloadLogo {} => to_json_binary(&query_download_logo(deps)?),
     }

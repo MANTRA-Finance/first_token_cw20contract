@@ -1,5 +1,5 @@
 [package]
-name = "stable-coin"
+name = "first_token_cw20contract"
 version = "0.1.0"
 authors = ["shreya <shreya.gupta13606@gmail.com>"]
 edition = "2021"
@@ -28,23 +28,22 @@ library = []
 optimize = """docker run --rm -v "$(pwd)":/code \
   --mount type=volume,source="$(basename "$(pwd)")_cache",target=/target \
   --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
-  cosmwasm/optimizer:0.15.0
+  cosmwasm/optimizer:0.16.0
 """
 
 [dependencies]
-cw20-base = {  version = "0.13.2", features = ["library"] }
+cw20-base = {  version = "2.0.0", features = ["library"] }
 cw20 = "2.0.0"
-cw-utils = "0.12.1"
-cosmwasm-std = "1.0.0"
+cw-utils = "2.0.0"
+cosmwasm-std = "2.1.3"
 cosmwasm-storage = "1.1.1"
-cw-storage-plus = "0.15.0"
-cw2 = "0.15.0"
-schemars = "0.8.10"
-serde = { version = "1.0.144", default-features = false, features = ["derive"] }
-thiserror = { version = "1.0.31" }
-cosmwasm-schema = "1.1.4"
-prost = "0.12"
+cw-storage-plus = "2.0.0"
+cw2 = "2.0.0"
+schemars = "0.8.21"
+serde = { version = "1.0.207", default-features = false, features = ["derive"] }
+thiserror = { version = "1.0.63" }
+cosmwasm-schema = "2.1.3"
+prost = "0.13.1"
 
 [dev-dependencies]
-cosmwasm-schema = "1.1.1"
-cw-multi-test = "0.15.0"
+cw-multi-test = "2.1.0"
